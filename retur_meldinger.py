@@ -1,0 +1,15 @@
+#suksess
+SUKSESS = 200   #OK, returenerer innhold
+OPPRETTET_NY = 201  #OK, opprettet ny
+SUKSESS_INGEN_INNHOLD = 204  #OK, tomt innhold
+
+
+#Klientfeil
+UGYLDIG_INPUT = 400
+IKKE_AUTORISERT = 401
+IKKE_FUNNET = 404
+KONFLIKT = 409
+
+#Systemfeil
+GENERELL_FEIL = 500
+TABEL_FINNES_IKKE = 504

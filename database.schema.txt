@@ -1,0 +1,60 @@
+transaksjon:
+    id  (forhåpentligvis Transaksjons-id fra DNB, men det blir en egen modul)
+    beløp
+    type
+    dato
+    beskrivelse
+
+kategori-tag:
+    transaksjons_id
+    kategori_id
+
+
+personer-tag:
+    transaksjons_id
+    personer_id
+
+
+kategori:
+    id
+    navn
+
+
+personer:
+    id
+    navn
+
+
+CREATE TABLE kategorier(
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+    navn TEXT NOT NULL UNIQUE
+    );
+
+CREATE TABLE personer(
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+    navn TEXT NOT NULL UNIQUE
+    );
+
+CREATE TABLE transaksjoner (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+    pris NUMERIC NOT NULL,
+    type TEXT NOT NULL,
+    dato TEXT NOT NULL,
+    beskrivelse TEXT
+    );
+
+CREATE TABLE kategori_tag(
+    transaksjon_id INTEGER,
+    kategori_id INTEGER,
+    FOREIGN KEY(transaksjon_id) REFERENCES transaksjoner(id)
+    FOREIGN KEY(kategori_id) REFERENCES kategorier(id)
+    );
+
+CREATE TABLE person_tag(
+    transaksjon_id INTEGER,
+    person_id INTEGER,
+    FOREIGN KEY(transaksjon_id) REFERENCES transaksjoner(id)
+    FOREIGN KEY(person_id) REFERENCES personer(id)
+    );
+
+
