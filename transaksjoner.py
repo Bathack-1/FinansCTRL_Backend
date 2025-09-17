@@ -2,7 +2,7 @@ import typing
 from sqlite3 import OperationalError
 from personer import Personer
 from kategorier import Kategorier
-from privat import _hent_rad_fra_tabell, _formater_svar, _str_til_str_list_parser, _filtrer_ut_tag_navn_fra_transaksjon
+from privat import _hent_rad_fra_tabel, _formater_svar, _str_til_str_list_parser, _filtrer_ut_tag_navn_fra_transaksjon
 from retur_meldinger import *
 from validering import *
 import datetime
@@ -145,8 +145,17 @@ class Transaksjoner:
         return _formater_svar(SUKSESS, transaksjon, "suksess")
 
 
-    def hent_transaksjoner_på_pris(self, mengde, beløp) -> dict:
-        """status: int, innhold: [{id, beløp, type, dato, beskrivelse}], message: str"""
+    def hent_transaksjoner_på_pris(self, beløp, mengde="=") -> dict:
+        """
+        Henter alle transaksjoner i et beløps-segment
+        :param beløp: int, prisen
+        :param mengde: str, hvilket segment,
+            større enn, lik, mindre enn
+        :return: _formater_svar[innhold] -> [{id, beløp, type, dato, beskrivelse}].
+            Feilmelding hvis ikke gyldig handling.
+            SUKSESS hvis transaksjon funnet.
+            SUKSESS_INGEN_INNHOLD hvis transaksjon ikke funnet.
+        """
 
         if not er_helltall(beløp):
             return _formater_svar(UGYLDIG_INPUT, [], f"Forventet typen int, fikk verdien {beløp} av typen {type(beløp).__name__}")
@@ -178,8 +187,14 @@ class Transaksjoner:
 
 
     def hent_transaksjoner_på_type(self, handling) -> dict:
-        """ "innskud" eller "uttak".
-        status: int, innhold: [{id, beløp, type, dato, beskrivelse}], message: str"""
+        """
+        Henter alle transaksjoner på handlings-type
+        :param handling: str, "innskudd", "uttak", "utlegg" eller "tilbakebetaling"
+        :return: _formater_svar[innhold] -> [{id, beløp, type, dato, beskrivelse}].
+            Feilmelding hvis ikke gyldig handling.
+            SUKSESS hvis transaksjon funnet.
+            SUKSESS_INGEN_INNHOLD hvis transaksjon ikke funnet.
+        """
         if not er_gyldig_handling(handling):
             return _formater_svar(UGYLDIG_INPUT, [], f'Feil type handling. forventet "innskudd", "uttak", "utlegg" eller "tilbakebetaling" fikk "{handling}", av typen {type(handling).__name__}')
 
@@ -223,7 +238,14 @@ class Transaksjoner:
 
 
     def hent_personer(self, transaksjon_id) -> dict:
-        """status: int, innhold: [{id, beløp, type, dato, beskrivelse}], message: str"""
+        """
+        Henter alle personer knyttet til en gitt transaksjon.
+
+        :param transaksjon_id: int eller str, unik identifikator for transaksjonen
+        :return: dict
+            - Hvis ingen personer funnet: {status: SUKSESS_INGEN_INNHOLD, innhold: [], melding: "..."}
+            - Hvis personer funnet: {status: SUKSESS, innhold: [{id, navn, ...}, ...], melding: "suksess"}
+        """
         person_ider = self.database.execute("SELECT person_id FROM person_tag WHERE transaksjon_id = ?", (transaksjon_id,),
                                  fetchall=True)
 
@@ -255,6 +277,16 @@ class Transaksjoner:
 
 
     def hent_transaksjon_med_alt(self, transaksjon_id) -> dict:
+        """
+        Henter en transaksjon med tilhørende personer og kategorier basert på ID.
+
+        :param transaksjon_id: int eller str, unik identifikator for transaksjonen
+        :return: dict
+            - Hvis transaksjon ikke finnes: {status: IKKE_FUNNET, innhold: [], melding: "..."}
+            - Hvis ugyldig input: {status: UGYLDIG_INPUT, innhold: [], melding: "..."}
+            - Hvis funnet: {status: SUKSESS, innhold: {id, beløp, type, dato, beskrivelse,
+              personer: [{id, navn}], kategorier: [{id, navn}]}, melding: "suksess"}
+        """
 
         transaksjon = self.hent_på_id(transaksjon_id)
 
