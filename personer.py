@@ -1,5 +1,5 @@
 from sqlite3 import OperationalError
-from privat import _hent_rad_fra_tabell, _formater_svar, _finn_transaksjoner_på_id_liste
+from privat import _hent_rad_fra_tabel, _formater_svar, _finn_transaksjoner_på_id_liste
 from retur_meldinger import *
 from validering import *
 
@@ -25,7 +25,7 @@ class Personer:
         if not er_helltall(iden):
             return _formater_svar(UGYLDIG_INPUT, [], f"forventet type int, fikk {iden} av typen {type(iden).__name__}")
 
-        return _hent_rad_fra_tabell(self.database, "personer", "id", iden, f"Fant ingen personer med iden {iden}")
+        return _hent_rad_fra_tabel(self.database, "personer", "id", iden, f"Fant ingen personer med iden {iden}")
 
 
     def hent_på_navn(self, navn : str) -> dict:
@@ -33,7 +33,7 @@ class Personer:
         if not er_gyldig_tekst(navn):
             return _formater_svar(UGYLDIG_INPUT, [], f"forventet type str, fikk {navn} av typen {type(navn).__name__}")
 
-        return _hent_rad_fra_tabell(self.database, "personer", "navn", navn, f"Fant ingen personer med navn {navn}")
+        return _hent_rad_fra_tabel(self.database, "personer", "navn", navn, f"Fant ingen personer med navn {navn}")
 
 
     def hent_transaksjoner(self, person_id) -> dict:
